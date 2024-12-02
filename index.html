@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polygon Animation with Inner Shapes</title>
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+            background-color: #1a1a1a;
+        }
+        #canvas1 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas1"></canvas>
+    <script>
+        const canvas = document.querySelector('#canvas1');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let number = 0;
+        let scale = 15;
+        let size = 5;
+        let hue = 0;
+        const sides = 6; // 다각형의 변의 수 (예: 6이면 육각형)
+
+        function drawPolygon() {
+            let angle = number * 15; // 각도 조정
+            let radius = scale * Math.sqrt(number);
+            let positionX = radius * Math.cos(angle) + canvas.width / 2;
+            let positionY = radius * Math.sin(angle) + canvas.height / 2;
+
+            // 파스텔톤 색상 생성
+            const pastelHue = (hue + 180) % 360;
+            ctx.fillStyle = `hsl(${pastelHue}, 70%, 80%)`; // 파스텔 색상
+            ctx.strokeStyle = `hsl(${(pastelHue + 180) % 360}, 70%, 80%)`; // 보색
+            ctx.lineWidth = 1;
+
+            ctx.beginPath();
+            ctx.moveTo(positionX + size * Math.cos(angle), positionY + size * Math.sin(angle));
+            for (let i = 1; i < sides; i++) {
+                ctx.lineTo(positionX + size * Math.cos(angle + (i * 2 * Math.PI / sides)), 
+                           positionY + size * Math.sin(angle + (i * 2 * Math.PI / sides)));
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 내부 도형 그리기
+            for (let j = 0; j < 5; j++) {
+                drawInnerShape(positionX, positionY, j);
+            }
+
+            size += 0.2; // 크기 증가
+            number += 1;
+            hue += 2; // 색상 변화
+        }
+
+        function drawInnerShape(centerX, centerY, index) {
+            const innerSize = size * 0.5; // 내부 도형 크기
+            const innerSides = 3 + index; // 내부 도형의 변의 수 (삼각형부터 시작)
+            const innerAngleOffset = (number + index) * 10; // 각도 오프셋
+
+            ctx.fillStyle = `hsl(${(hue + index * 30) % 360}, 70%, 90%)`; // 내부 도형 색상
+            ctx.strokeStyle = `hsl(${(hue + index * 30 + 180) % 360}, 70%, 90%)`; // 보색
+            ctx.lineWidth = 1;
+
+            ctx.beginPath();
+            ctx.moveTo(centerX + innerSize * Math.cos(innerAngleOffset), centerY + innerSize * Math.sin(innerAngleOffset));
+            for (let i = 1; i < innerSides; i++) {
+                ctx.lineTo(centerX + innerSize * Math.cos(innerAngleOffset + (i * 2 * Math.PI / innerSides)), 
+                           centerY + innerSize * Math.sin(innerAngleOffset + (i * 2 * Math.PI / innerSides)));
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // 캔버스 지우기
+            drawPolygon();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
